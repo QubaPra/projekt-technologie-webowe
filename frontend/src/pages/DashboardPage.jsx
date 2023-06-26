@@ -23,8 +23,26 @@ import { Search } from "@/components/Search";
 import TeamSwitcher from "@/components/TeamSwitcher";
 import { UserNav } from "@/components/UserNav";
 import { navigationLinks } from "../config/navigationLinks";
+import { useEffect, useState } from 'react';
 
 export const DashboardPage = () => {
+  const [totalSales, setTotalSales] = useState(0);
+
+  useEffect(() => {
+    async function fetchTotalSales() {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/orders');
+        const orders = await response.json();
+        setTotalSales(orders.length);
+      } catch (error) {
+        console.error('Error fetching total sales:', error);
+      }
+    }
+
+    fetchTotalSales();
+  }, []);
+
+
   return (
     <div className="hidden flex-col md:flex">
       <div className="border-b">
@@ -131,7 +149,7 @@ export const DashboardPage = () => {
                 <CardHeader>
                   <CardTitle>Recent Sales</CardTitle>
                   <CardDescription>
-                    You made 265 sales this month.
+                    You made {totalSales} {totalSales === 1 ? 'sale' : 'sales'} this month.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -15,12 +15,14 @@ class OrderCreateSchema(BaseModel):
         }
 
 class OrderUpdateSchema(BaseModel):
-    price: float | None
+    product_name: str | None
+    quantity: int | None    
 
     class Config:
         schema_extra = {
             "example": {                
-                "price": 199.99,                  
+                "product_name": "Desk",  
+                "quantity": 1         
             }
         }
 
