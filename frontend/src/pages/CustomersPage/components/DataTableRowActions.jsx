@@ -1,7 +1,4 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
 import { MoreHorizontal, Pen, Trash } from "lucide-react";
-
 import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
@@ -13,6 +10,26 @@ import {
 } from "@/components/ui/DropdownMenu";
 
 export function DataTableRowActions({ row }) {
+  console.log(row);
+  const deleteCustomer = async () => {
+    const customerID = parseInt(row.id)+1;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/customers/${customerID}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete customer with ID=${customerID}`);
+      }
+
+      // Optionally, you can handle the success response here
+      console.log(`Customer with ID=${customerID} deleted successfully.`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,7 +47,7 @@ export function DataTableRowActions({ row }) {
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={deleteCustomer}>
           <Trash className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
           Delete
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
