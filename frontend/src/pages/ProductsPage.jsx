@@ -5,6 +5,8 @@ import { UserNav } from "./CustomersPage/components/UserNav";
 
 export const ProductsPage = () => {
   const [products, setProducts] = useState([]);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editedProductPrice, setEditedProductPrice] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -18,6 +20,59 @@ export const ProductsPage = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
     }
+  };
+
+  const deleteProduct = async (productId) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/products/${productId}`, {
+        method: "DELETE",
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
+  const startEditingProduct = (productId, price) => {
+    setEditingProductId(productId);
+    setEditedProductPrice(price);
+  };
+
+  const cancelEditingProduct = () => {
+    setEditingProductId(null);
+    setEditedProductPrice("");
+  };
+
+  const saveEditedProduct = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/products/${editingProductId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            price: editedProductPrice,
+          }),
+        }
+      );
+      if (response.ok) {
+        fetchData();
+      } else {
+        console.error("Error saving edited product:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error saving edited product:", error);
+    } finally {
+      setEditingProductId(null);
+      setEditedProductPrice("");
+    }
+  };
+
+  const handleInputChange = (event) => {
+    const { value } = event.target;
+    setEditedProductPrice(value);
   };
 
   return (
@@ -38,19 +93,61 @@ export const ProductsPage = () => {
           <table className="min-w-full text-left bg-white border border-gray-300">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b">Product ID</th>
-                <th className="px-6 py-3 border-b">Name</th>
-                <th className="px-6 py-3 border-b">Price</th>
-                <th className="px-6 py-3 border-b">Description</th>
+                <th className="px-6 py-3 text-sm border-b">Product ID</th>
+                <th className="px-6 py-3 text-sm border-b">Name</th>
+                <th className="px-6 py-3 text-sm border-b">Price</th>
+                <th className="px-6 py-3 text-sm border-b">Description</th>
+                <th className="px-6 py-3 text-sm border-b">Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-100">
-                  <td className="px-6 py-4 border-b">{product.id}</td>
-                  <td className="px-6 py-4 border-b">{product.name}</td>
-                  <td className="px-6 py-4 border-b">${product.price}</td>
-                  <td className="px-6 py-4 border-b">{product.description}</td>
+                  <td className="px-6 py-4 text-sm border-b">{product.id}</td>
+                  <td className="px-6 py-4 text-sm border-b">{product.name}</td>
+                  <td className="px-6 py-4 text-sm border-b">
+                  ${editingProductId === product.id ? (
+                      <input
+                        type="text"
+                        name="price"
+                        value={editedProductPrice}
+                        onChange={handleInputChange}
+                        className="border rounded px-2 py-1 w-14"
+                      />
+                    ) : (
+                      `${product.price}`
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm border-b">{product.description}</td>
+                  <td className="px-6 py-4 text-sm border-b">
+                    {editingProductId === product.id ? (
+                      <>
+                        <button className="p-2 text-sm"  onClick={saveEditedProduct}>
+                          Save
+                        </button>
+                        <button className="p-2 text-sm" onClick={cancelEditingProduct}>
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="p-2 text-sm"
+                          onClick={() =>
+                            startEditingProduct(product.id, product.price)
+                          }
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="p-2 text-sm text-red-500"
+                          onClick={() => deleteProduct(product.id)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
