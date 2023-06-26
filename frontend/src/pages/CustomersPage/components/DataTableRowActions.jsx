@@ -25,6 +25,7 @@ export function DataTableRowActions({ row }) {
 
       // Optionally, you can handle the success response here
       console.log(`Customer with ID=${customerID} deleted successfully.`);
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
